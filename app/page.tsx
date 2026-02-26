@@ -10,7 +10,7 @@ function MainContent() {
 
 export default function Home() {
   return (
-    <main className="flex w-screen h-screen bg-background">
+    <main className="flex w-screen h-screen bg-background overflow-hidden">
       <Sidebar />
       <MainContent />
     </main>
