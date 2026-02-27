@@ -1,16 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
-interface ChatStoreState {
-  messages: Message[];
-  isLoading: boolean;
-  sendMessage: (content: string) => Promise<void>;
-}
+import { ChatStoreState, Message } from "../types/messages";
 
 export const useChatStore = create<ChatStoreState>()(
   persist(
@@ -19,8 +9,13 @@ export const useChatStore = create<ChatStoreState>()(
       isLoading: false,
       sendMessage: async (content: string) => {
         const userMessage: Message = { role: "user", content };
+
         set((state) => ({
-          messages: [...state.messages, userMessage],
+          messages: [
+            ...state.messages,
+            userMessage,
+            { role: "assistant", content: "" },
+          ],
           isLoading: true,
         }));
 
@@ -29,18 +24,36 @@ export const useChatStore = create<ChatStoreState>()(
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              messages: [...get().messages],
+              messages: get().messages.slice(0, -1),
             }),
           });
 
           if (!response.ok) throw new Error("Failed to fetch AI");
+          if (!response.body) throw new Error("No response body");
 
-          const aiData = await response.json();
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let accumulatedContent = "";
 
-          set((state) => ({
-            messages: [...state.messages, aiData],
-            isLoading: false,
-          }));
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedContent += chunk;
+
+            set((state) => {
+              const newMessages = [...state.messages];
+              const lastIndex = newMessages.length - 1;
+              newMessages[lastIndex] = {
+                ...newMessages[lastIndex],
+                content: accumulatedContent,
+              };
+              return { messages: newMessages };
+            });
+          }
+
+          set({ isLoading: false });
         } catch (err) {
           console.error("Chat Error: ", err);
           set({ isLoading: false });
