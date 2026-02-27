@@ -34,9 +34,13 @@ export default function Sidebar() {
         },
       });
 
-      tl.to(containerRef.current, { width: isOpen ? 256 : 45 }, 0)
+      tl.to(containerRef.current, { width: isOpen ? 256 : 49 }, 0)
         .to(".sidebar-logo", { opacity: isOpen ? 1 : 0 }, 0)
-        .to(".sidebar-arrow", { rotate: isOpen ? 0 : 180 }, 0)
+        .to(
+          ".sidebar-arrow",
+          { right: isOpen ? 0 : 0, rotate: isOpen ? 0 : 180 },
+          0,
+        )
         .to(".sidebar-menu-items", { opacity: isOpen ? 1 : 0 }, 0);
 
       isFirstRender.current = false;
@@ -52,18 +56,18 @@ export default function Sidebar() {
     <div
       className={`
         relative bg-sidebar border-r border-sidebar-border h-screen flex flex-col shrink-0 overflow-hidden
-        ${isOpen ? "w-64" : "w-14"} 
+        ${isOpen ? "w-64" : "w-16"} 
       `}
       ref={containerRef}
     >
-      <div className="p-1.5">
-        <div className="flex justify-between items-center mb-3">
+      <div className="p-2 pt-2.5">
+        <div className="relative flex justify-between items-center mb-3">
           <div className="sidebar-logo">
             <Logo />
           </div>
           <ChevronLeft
             onClick={toggle}
-            className="cursor-pointer sidebar-arrow p-1.5 size-8 opacity-50 hover:bg-white/20 rounded-md transition-colors absolute right-1.5 durationn-100"
+            className={`cursor-pointer sidebar-arrow p-1.5 size-8 opacity-50 hover:bg-white/20 rounded-md transition-colors absolute duration-100`}
           />
         </div>
         <div className="text-sm">

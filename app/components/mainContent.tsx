@@ -65,9 +65,12 @@ function ChatSection({ messages }: { messages: Message[] }) {
       const targetEl = messageElements[targetIndex] as HTMLElement;
 
       if (targetEl) {
-        containerRef.current.scrollTo({
-          top: targetEl.offsetTop - 64,
-          behavior: behavior,
+        // Use requestAnimationFrame to ensure the DOM has painted the new spacerHeight
+        requestAnimationFrame(() => {
+          containerRef.current?.scrollTo({
+            top: targetEl.offsetTop - 64,
+            behavior: behavior,
+          });
         });
       }
       pendingScrollRef.current = null;
@@ -85,12 +88,13 @@ function ChatSection({ messages }: { messages: Message[] }) {
     return () => resizeObserver.disconnect();
   }, [messages]);
 
+  // Fix: Trigger the initial scroll only after messages are definitely available
   useLayoutEffect(() => {
     if (messages.length > 0 && !hasInitialScrolled.current) {
       updateLayout("instant", true);
       hasInitialScrolled.current = true;
     }
-  }, []);
+  }, [messages]); // Added messages dependency for reliable initial trigger
 
   useLayoutEffect(() => {
     updateLayout("instant", false);
