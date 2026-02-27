@@ -5,7 +5,7 @@ import Logo from "./logo";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { useSidebarState } from "../store/sidebar";
+import { useSidebarState } from "../store/useSidebar";
 
 export default function Sidebar() {
   const [isHydrated, setIsHydrated] = useState(false);

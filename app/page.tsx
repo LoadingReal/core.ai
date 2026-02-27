@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "./components/sidebar";
-
-function MainContent() {
-  return <div className="flex-1">Main Content</div>;
-}
+import MainContent from "./components/mainContent";
 
 export default function Home() {
   const [mounted, setMounted] = useState<boolean>(false);
