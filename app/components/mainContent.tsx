@@ -49,7 +49,24 @@ function ChatSection({ messages }: { messages: Message[] }) {
         const newHeight = Math.max(0, containerHeight - activeContentHeight);
 
         if (shouldScroll) {
-          pendingScrollRef.current = { behavior, targetIndex: lastUserIndex };
+          const lastMessage = messages[messages.length - 1];
+          const lastUserIndex = messages.findLastIndex(
+            (m) => m.role === "user",
+          );
+          const targetIndex =
+            lastMessage?.role === "user"
+              ? messageElements.length - 1
+              : lastUserIndex;
+          const targetEl = messageElements[targetIndex] as HTMLElement;
+
+          if (targetEl) {
+            requestAnimationFrame(() => {
+              container.scrollTo({
+                top: targetEl.offsetTop - 64,
+                behavior: behavior,
+              });
+            });
+          }
         }
 
         setSpacerHeight(newHeight);
@@ -65,7 +82,6 @@ function ChatSection({ messages }: { messages: Message[] }) {
       const targetEl = messageElements[targetIndex] as HTMLElement;
 
       if (targetEl) {
-        // Use requestAnimationFrame to ensure the DOM has painted the new spacerHeight
         requestAnimationFrame(() => {
           containerRef.current?.scrollTo({
             top: targetEl.offsetTop - 64,
@@ -88,13 +104,12 @@ function ChatSection({ messages }: { messages: Message[] }) {
     return () => resizeObserver.disconnect();
   }, [messages]);
 
-  // Fix: Trigger the initial scroll only after messages are definitely available
   useLayoutEffect(() => {
     if (messages.length > 0 && !hasInitialScrolled.current) {
       updateLayout("instant", true);
       hasInitialScrolled.current = true;
     }
-  }, [messages]); // Added messages dependency for reliable initial trigger
+  }, [messages]);
 
   useLayoutEffect(() => {
     updateLayout("instant", false);
@@ -104,7 +119,9 @@ function ChatSection({ messages }: { messages: Message[] }) {
     const isNewMessageAdded = messages.length > prevCountRef.current;
 
     if (isNewMessageAdded) {
-      updateLayout("smooth", true);
+      setTimeout(() => {
+        updateLayout("smooth", true);
+      }, 50);
     }
 
     prevCountRef.current = messages.length;
