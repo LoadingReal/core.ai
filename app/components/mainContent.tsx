@@ -1,4 +1,5 @@
 import {
+  memo,
   SubmitEvent,
   useEffect,
   useLayoutEffect,
@@ -9,8 +10,35 @@ import { useChatStore } from "../store/useChatStore";
 import { MoveRight } from "lucide-react";
 import { Message } from "../types/messages";
 import ReactMarkdown from "react-markdown";
+import gsap from "gsap";
+
+const MessageRow = memo(({ message }: { message: Message }) => {
+  return (
+    <div className="flex">
+      <div className="min-w-16 pt-4">
+        {message.role === "assistant" && (
+          <div
+            className="assistant-icon translate-z-0 w-4 rounded-full h-4 bg-primary mx-auto 
+                      after:content-[''] after:absolute after:inset-0 after:bg-inherit after:rounded-inherit after:-z-10
+                      after:transform-[scale(var(--halo-scale,1))] after:opacity-(--halo-opacity,0) after:rounded-full"
+          ></div>
+        )}
+      </div>
+      <div
+        className={`message-item p-3 leading-relaxed ${
+          message.role === "assistant"
+            ? "text-foreground prose prose-neutral prose-pre:bg-sidebar prose-strong:text-primary prose-a:text-primary prose-code:text-primary dark:prose-neutral max-w-none"
+            : "bg-sidebar rounded-md max-w-120 w-fit ml-auto mt-16"
+        }`}
+      >
+        <ReactMarkdown>{message.content}</ReactMarkdown>
+      </div>
+    </div>
+  );
+});
 
 function ChatSection({ messages }: { messages: Message[] }) {
+  const { isLoading } = useChatStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [spacerHeight, setSpacerHeight] = useState(0);
   const prevCountRef = useRef(messages.length);
@@ -127,21 +155,59 @@ function ChatSection({ messages }: { messages: Message[] }) {
     prevCountRef.current = messages.length;
   }, [messages.length]);
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (isLoading) {
+        const icons = document.querySelectorAll(".assistant-icon");
+        const lastIcon = icons[icons.length - 1];
+
+        if (lastIcon) {
+          gsap.to(lastIcon, {
+            scale: 1.3,
+            borderRadius: "100%",
+            duration: 0.5,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            overwrite: "auto",
+          });
+
+          gsap.fromTo(
+            lastIcon,
+            {
+              "--halo-scale": 1,
+              "--halo-opacity": 0.6,
+            },
+            {
+              "--halo-scale": 2,
+              "--halo-opacity": 0,
+              borderRadius: "100%",
+              duration: 1,
+              repeat: -1,
+              ease: "power1.out",
+            },
+          );
+        }
+      } else {
+        gsap.to(".assistant-icon", {
+          scale: 1,
+          "--halo-scale": 1,
+          "--halo-opacity": 0,
+          borderRadius: "100%",
+          duration: 0.3,
+        });
+      }
+    });
+
+    return () => ctx.revert();
+  }, [isLoading]);
+
   return (
     <div ref={containerRef} className="flex-1 overflow-y-auto custom-scrollbar">
       <div className="max-w-200 mx-auto px-4 pb-12">
         <div className="flex flex-col space-y-4">
           {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`message-item p-3 leading-relaxed ${
-                message.role === "assistant"
-                  ? "text-foreground prose prose-neutral prose-pre:bg-sidebar prose-strong:text-primary prose-a:text-primary prose-code:text-primary dark:prose-neutral max-w-none"
-                  : "bg-sidebar rounded-md max-w-120 w-fit ml-auto mt-16"
-              }`}
-            >
-              <ReactMarkdown>{message.content}</ReactMarkdown>
-            </div>
+            <MessageRow key={index} message={message} />
           ))}
 
           <div style={{ height: `${spacerHeight}px`, width: "100%" }} />
@@ -152,7 +218,7 @@ function ChatSection({ messages }: { messages: Message[] }) {
 }
 
 export default function MainContent() {
-  const { messages, sendMessage, isLoading } = useChatStore();
+  const { messages, sendMessage } = useChatStore();
   const [chatMessage, setChatMessage] = useState<string>("");
   const editableRef = useRef<HTMLParagraphElement>(null);
 
