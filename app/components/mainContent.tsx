@@ -203,7 +203,10 @@ function ChatSection({ messages }: { messages: Message[] }) {
   }, [isLoading]);
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-y-auto custom-scrollbar">
+    <div
+      ref={containerRef}
+      className="flex-1 overflow-y-auto custom-scrollbar px-6"
+    >
       <div className="max-w-200 mx-auto px-4 pb-12">
         <div className="flex flex-col space-y-4">
           {messages.map((message, index) => (
@@ -244,7 +247,7 @@ export default function MainContent() {
       <ChatSection messages={messages} />
       <form
         onSubmit={handleSend}
-        className="w-full bg-background relative pb-2 mx-auto"
+        className="w-full bg-background relative pb-2 mx-auto px-6"
       >
         <div className="bg-linear-to-t from-background via-background/50 to-transparent h-16 w-full absolute -top-16 left-0 pointer-events-none"></div>
         <div className="relative mx-auto max-w-200 w-full">

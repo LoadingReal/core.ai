@@ -7,17 +7,73 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useSidebarState } from "../store/useSidebar";
 
+function SidebarOptions() {
+  const { isOpen } = useSidebarState();
+
+  const sidebarMenu = [
+    { icon: MessageCirclePlus, title: "New chat" },
+    { icon: Search, title: "Search chats" },
+  ];
+
+  return (
+    <div className="text-sm">
+      {sidebarMenu.map((item, index) => (
+        <div
+          key={index}
+          className={`
+              flex items-center overflow-hidden duration-100 transition-colors py-0.5 cursor-pointer
+              ${isOpen && "hover:bg-white/5 rounded-md"}
+            `}
+        >
+          <div className="flex">
+            <item.icon
+              className={`
+                  size-8 shrink-0 p-1.5 opacity-80 duration-100 transition-colors
+                  ${!isOpen && "hover:bg-white/10 rounded-md"}
+                `}
+            />
+          </div>
+          <span className="shrink-0 sidebar-menu-items">{item.title}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SidebarProfile() {
+  const scope = useRef<HTMLDivElement>(null);
+  const { isOpen } = useSidebarState();
+
+  useGSAP(
+    () => {
+      gsap.to(".sidebar-username", {
+        opacity: isOpen ? 1 : 0,
+        duration: 0.3,
+        ease: "power2.inOut",
+      });
+    },
+    { scope, dependencies: [isOpen] },
+  );
+
+  return (
+    <div
+      ref={scope}
+      className="flex gap-2 mt-auto p-3 border rounded-md hover:bg-white/5 transition-colors duration-100"
+    >
+      <div className="w-6 h-6 bg-neutral-500 shrink-0 pointer-events-none text-white rounded-full text-center">
+        G
+      </div>
+      <span className="sidebar-username">Guest</span>
+    </div>
+  );
+}
+
 export default function Sidebar() {
   const [isHydrated, setIsHydrated] = useState(false);
 
   const { isOpen, toggle } = useSidebarState();
   const containerRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef<boolean>(true);
-
-  const sidebarMenu = [
-    { icon: MessageCirclePlus, title: "New chat" },
-    { icon: Search, title: "Search chats" },
-  ];
 
   useEffect(() => {
     setIsHydrated(true);
@@ -55,7 +111,7 @@ export default function Sidebar() {
   return (
     <div
       className={`
-        relative bg-sidebar border-r border-sidebar-border h-screen flex flex-col shrink-0 overflow-hidden
+        relative bg-sidebar h-screen flex flex-col shrink-0 overflow-hidden
         ${isOpen ? "w-64" : "w-16"} 
       `}
       ref={containerRef}
@@ -70,28 +126,9 @@ export default function Sidebar() {
             className={`cursor-pointer sidebar-arrow p-1.5 size-8 opacity-50 hover:bg-white/20 rounded-md transition-colors absolute duration-100`}
           />
         </div>
-        <div className="text-sm">
-          {sidebarMenu.map((item, index) => (
-            <div
-              key={index}
-              className={`
-              flex items-center overflow-hidden duration-100 transition-colors py-0.5 cursor-pointer
-              ${isOpen && "hover:bg-white/5 rounded-md"}
-            `}
-            >
-              <div className="flex">
-                <item.icon
-                  className={`
-                  size-8 shrink-0 p-1.5 opacity-80 duration-100 transition-colors
-                  ${!isOpen && "hover:bg-white/10 rounded-md"}
-                `}
-                />
-              </div>
-              <span className="shrink-0 sidebar-menu-items">{item.title}</span>
-            </div>
-          ))}
-        </div>
+        <SidebarOptions />
       </div>
+      <SidebarProfile />
     </div>
   );
 }
