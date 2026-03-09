@@ -22,14 +22,14 @@ function SidebarOptions() {
           key={index}
           className={`
               flex items-center overflow-hidden duration-100 transition-colors py-0.5 cursor-pointer
-              ${isOpen && "hover:bg-white/5 rounded-md"}
+              ${isOpen && "hover:bg-black/5 dark:hover:bg-white/5 rounded-md"}
             `}
         >
           <div className="flex">
             <item.icon
               className={`
                   size-8 shrink-0 p-1.5 opacity-80 duration-100 transition-colors
-                  ${!isOpen && "hover:bg-white/10 rounded-md"}
+                  ${!isOpen && "hover:bg-black/10 dark:hover:bg-white/10 rounded-md"}
                 `}
             />
           </div>
@@ -58,12 +58,14 @@ function SidebarProfile() {
   return (
     <div
       ref={scope}
-      className="flex gap-2 mt-auto p-3 border rounded-md hover:bg-white/5 transition-colors duration-100"
+      className="flex gap-3 mt-auto p-3 border rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-100"
     >
-      <div className="w-6 h-6 bg-neutral-500 shrink-0 pointer-events-none text-white rounded-full text-center">
+      <div className="pointer-events-none select-none w-6 h-6 bg-neutral-500 shrink-0 text-white rounded-full text-center">
         G
       </div>
-      <span className="sidebar-username">Guest</span>
+      <span className="pointer-events-none select-none sidebar-username">
+        Guest
+      </span>
     </div>
   );
 }
@@ -123,7 +125,7 @@ export default function Sidebar() {
           </div>
           <ChevronLeft
             onClick={toggle}
-            className={`cursor-pointer sidebar-arrow p-1.5 size-8 opacity-50 hover:bg-white/20 rounded-md transition-colors absolute duration-100`}
+            className={`cursor-pointer sidebar-arrow p-1.5 size-8 opacity-50 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors absolute duration-100`}
           />
         </div>
         <SidebarOptions />

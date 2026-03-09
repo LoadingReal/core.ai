@@ -18,7 +18,7 @@ const MessageRow = memo(({ message }: { message: Message }) => {
       <div className="min-w-16 pt-4">
         {message.role === "assistant" && (
           <div
-            className="assistant-icon translate-z-0 w-4 rounded-full h-4 bg-primary mx-auto 
+            className="assistant-icon translate-z-0 w-4 rounded-full h-4 bg-neutral-500 dark:bg-primary mx-auto 
                       after:content-[''] after:absolute after:inset-0 after:bg-inherit after:rounded-inherit after:-z-10
                       after:transform-[scale(var(--halo-scale,1))] after:opacity-(--halo-opacity,0) after:rounded-full"
           ></div>
