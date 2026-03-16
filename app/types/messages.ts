@@ -18,5 +18,5 @@ export interface ChatStoreState {
   createChat: () => string;
   switchChat: (id: string | null) => void;
   deleteChat: (id: string) => void;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, chatId?: string) => Promise<void>;
 }

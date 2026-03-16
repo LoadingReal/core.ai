@@ -235,15 +235,21 @@ export default function MainContent() {
     e?.preventDefault();
     if (!chatMessage.trim()) return;
 
+    const messageToSend = chatMessage; // Capture the message
     setChatMessage("");
     if (editableRef.current) editableRef.current.innerText = "";
 
     let targetId = currentChatId;
+
     if (!targetId) {
+      // 1. Create the chat and get the ID
       targetId = createChat();
+      // 2. Navigate immediately
       router.push(`/chat/${targetId}`);
     }
-    await sendMessage(chatMessage);
+
+    // 3. Pass targetId to sendMessage so it doesn't rely on the potentially stale 'currentChatId'
+    await sendMessage(messageToSend, targetId);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -255,17 +261,16 @@ export default function MainContent() {
 
   return (
     <div className="flex-1 flex flex-col h-screen relative overflow-hidden">
-      {!currentChatId ? (
-        <div className="flex-1 flex items-center justify-center">
-          <button
-            onClick={() => createChat()}
-            className="p-4 bg-primary text-white rounded-lg"
-          >
-            Start a new conversation
-          </button>
-        </div>
-      ) : (
+      {/* If messages exist, show them. If not, show a 'Welcome' or empty state */}
+      {messages.length > 0 ? (
         <ChatSection messages={messages} />
+      ) : (
+        <div className="flex-1 h-full flex flex-col items-center justify-center text-center p-6">
+          <h1 className="text-2xl font-bold mb-2">What can I help with?</h1>
+          <p className="text-muted-foreground">
+            Start typing below to begin a new chat.
+          </p>
+        </div>
       )}
 
       <form

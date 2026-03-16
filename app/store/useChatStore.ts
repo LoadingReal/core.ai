@@ -37,13 +37,11 @@ export const useChatStore = create<ChatStoreState>()(
           };
         }),
 
-      sendMessage: async (content: string) => {
-        const { currentChatId, chats } = get();
-        // If no chat exists, create one first
-        let activeId = currentChatId;
-        if (!activeId) {
-          activeId = get().createChat();
-        }
+      sendMessage: async (content: string, chatId?: string) => {
+        const { currentChatId, createChat } = get();
+
+        // Use the passed ID, or the current one, or create a new one as a fallback
+        const activeId = chatId || currentChatId || createChat();
 
         const userMessage: Message = { role: "user", content };
 
@@ -51,10 +49,11 @@ export const useChatStore = create<ChatStoreState>()(
           isLoading: true,
           chats: {
             ...state.chats,
-            [activeId!]: {
-              ...state.chats[activeId!],
+            [activeId]: {
+              ...state.chats[activeId],
+              // If it's a new chat, the messages array might be undefined/empty
               messages: [
-                ...state.chats[activeId!].messages,
+                ...(state.chats[activeId]?.messages || []),
                 userMessage,
                 { role: "assistant", content: "" },
               ],
@@ -67,8 +66,8 @@ export const useChatStore = create<ChatStoreState>()(
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              // Send history for the active chat
-              messages: get().chats[activeId!].messages.slice(0, -1),
+              // Grab the history we just updated in state
+              messages: get().chats[activeId].messages.slice(0, -1),
             }),
           });
 
