@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, MessageCirclePlus, Search } from "lucide-react";
+import { ChevronLeft, MessageCirclePlus, Search, Trash2 } from "lucide-react";
 import Logo from "./logo";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react";
 import { useSidebarState } from "../store/useSidebar";
 import { useChatStore } from "../store/useChatStore";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function SidebarOptions() {
   const { isOpen } = useSidebarState();
@@ -49,7 +50,9 @@ function SidebarOptions() {
 }
 
 function SidebarChats() {
-  const { chats, currentChatId } = useChatStore();
+  const router = useRouter();
+  const scope = useRef<HTMLDivElement>(null);
+  const { chats, currentChatId, deleteChat } = useChatStore();
   const { isOpen } = useSidebarState();
 
   // Sort chats by date (newest first)
@@ -57,35 +60,71 @@ function SidebarChats() {
     (a, b) => b.createdAt - a.createdAt,
   );
 
+  useGSAP(
+    () => {
+      gsap.to(".sidebar-menu-items", {
+        opacity: isOpen ? 1 : 0,
+        duration: 0.3,
+        ease: "power2.inOut",
+      });
+    },
+    { scope, dependencies: [isOpen] },
+  );
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this chat?")) {
+      deleteChat(id);
+      if (currentChatId === id) {
+        router.push("/");
+      }
+    }
+  };
+
   return (
-    <div className="flex-1 overflow-y-auto mt-4 px-2 space-y-1">
-      {isOpen && (
-        <p className="text-[10px] uppercase font-bold text-muted-foreground px-2 mb-2 sidebar-menu-items">
-          Recent
-        </p>
-      )}
+    <div
+      ref={scope}
+      className="flex-1 overflow-y-auto mt-4 space-y-1 overflow-x-hidden shrink-0"
+    >
+      <p className="text-sm px-1 mb-2 font-bold text-muted-foreground sidebar-menu-items">
+        Recent
+      </p>
 
-      {sortedChats.map((chat) => (
-        <Link
-          key={chat.id}
-          href={`/chat/${chat.id}`}
-          className={`
-            flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors text-sm
-            ${currentChatId === chat.id ? "bg-black/10 dark:bg-white/10" : "hover:bg-black/5 dark:hover:bg-white/5"}
-            ${!isOpen && "justify-center"}
-          `}
-        >
-          <div className="shrink-0">
-            <div className="size-2 rounded-full bg-blue-500" />
+      {sortedChats.length > 0 ? (
+        sortedChats.map((chat) => (
+          <div key={chat.id} className="relative m-0 group/chat">
+            <Link
+              href={`/chat/${chat.id}`}
+              className={`
+              flex items-center px-1 py-2 rounded-md transition-colors text-sm
+              ${currentChatId === chat.id ? "bg-black/10 dark:bg-white/10" : "hover:bg-black/5 dark:hover:bg-white/5"}
+              ${!isOpen && "bg-transparent! pointer-events-none"}
+            `}
+            >
+              <span className="truncate px-2 sidebar-menu-items">
+                {chat.messages[0]?.content || "Empty Chat"}
+              </span>
+            </Link>
+
+            {isOpen && (
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity flex items-center">
+                <button
+                  onClick={(e) => handleDelete(e, chat.id)}
+                  className="p-1 hover:bg-red-500/20 hover:text-red-500 rounded-md transition-colors"
+                  title="Delete chat"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
+            )}
           </div>
-
-          {isOpen && (
-            <span className="truncate flex-1 sidebar-menu-items">
-              {chat.messages[0]?.content || "Empty Chat"}
-            </span>
-          )}
-        </Link>
-      ))}
+        ))
+      ) : (
+        <span className="px-3 text-sm text-muted-foreground/50 sidebar-menu-items text-nowrap">
+          No recent chats
+        </span>
+      )}
     </div>
   );
 }

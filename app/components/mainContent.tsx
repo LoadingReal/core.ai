@@ -261,7 +261,6 @@ export default function MainContent() {
 
   return (
     <div className="flex-1 flex flex-col h-screen relative overflow-hidden">
-      {/* If messages exist, show them. If not, show a 'Welcome' or empty state */}
       {messages.length > 0 ? (
         <ChatSection messages={messages} />
       ) : (
