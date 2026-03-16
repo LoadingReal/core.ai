@@ -6,35 +6,85 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useSidebarState } from "../store/useSidebar";
+import { useChatStore } from "../store/useChatStore";
+import Link from "next/link";
 
 function SidebarOptions() {
   const { isOpen } = useSidebarState();
 
-  const sidebarMenu = [
-    { icon: MessageCirclePlus, title: "New chat" },
-    { icon: Search, title: "Search chats" },
-  ];
-
   return (
     <div className="text-sm">
-      {sidebarMenu.map((item, index) => (
-        <div
-          key={index}
-          className={`
-              flex items-center overflow-hidden duration-100 transition-colors py-0.5 cursor-pointer
-              ${isOpen && "hover:bg-black/5 dark:hover:bg-white/5 rounded-md"}
-            `}
-        >
-          <div className="flex">
-            <item.icon
-              className={`
-                  size-8 shrink-0 p-1.5 opacity-80 duration-100 transition-colors
-                  ${!isOpen && "hover:bg-black/10 dark:hover:bg-white/10 rounded-md"}
-                `}
-            />
-          </div>
-          <span className="shrink-0 sidebar-menu-items">{item.title}</span>
+      {/* New Chat Link */}
+      <Link
+        href="/"
+        className={`
+          flex items-center overflow-hidden duration-100 transition-colors py-0.5 cursor-pointer
+          ${isOpen && "hover:bg-black/5 dark:hover:bg-white/5 rounded-md"}
+        `}
+      >
+        <div className="flex">
+          <MessageCirclePlus
+            className={`
+                size-8 shrink-0 p-1.5 opacity-80 duration-100 transition-colors
+                ${!isOpen && "hover:bg-black/10 dark:hover:bg-white/10 rounded-md"}
+              `}
+          />
         </div>
+        <span className="shrink-0 sidebar-menu-items">New chat</span>
+      </Link>
+
+      {/* Search Option */}
+      <div
+        className={`flex items-center overflow-hidden duration-100 transition-colors py-0.5 cursor-pointer ${isOpen && "hover:bg-black/5 dark:hover:bg-white/5 rounded-md"}`}
+      >
+        <div className="flex">
+          <Search
+            className={`size-8 shrink-0 p-1.5 opacity-80 duration-100 transition-colors ${!isOpen && "hover:bg-black/10 dark:hover:bg-white/10 rounded-md"}`}
+          />
+        </div>
+        <span className="shrink-0 sidebar-menu-items">Search chats</span>
+      </div>
+    </div>
+  );
+}
+
+function SidebarChats() {
+  const { chats, currentChatId } = useChatStore();
+  const { isOpen } = useSidebarState();
+
+  // Sort chats by date (newest first)
+  const sortedChats = Object.values(chats).sort(
+    (a, b) => b.createdAt - a.createdAt,
+  );
+
+  return (
+    <div className="flex-1 overflow-y-auto mt-4 px-2 space-y-1">
+      {isOpen && (
+        <p className="text-[10px] uppercase font-bold text-muted-foreground px-2 mb-2 sidebar-menu-items">
+          Recent
+        </p>
+      )}
+
+      {sortedChats.map((chat) => (
+        <Link
+          key={chat.id}
+          href={`/chat/${chat.id}`}
+          className={`
+            flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors text-sm
+            ${currentChatId === chat.id ? "bg-black/10 dark:bg-white/10" : "hover:bg-black/5 dark:hover:bg-white/5"}
+            ${!isOpen && "justify-center"}
+          `}
+        >
+          <div className="shrink-0">
+            <div className="size-2 rounded-full bg-blue-500" />
+          </div>
+
+          {isOpen && (
+            <span className="truncate flex-1 sidebar-menu-items">
+              {chat.messages[0]?.content || "Empty Chat"}
+            </span>
+          )}
+        </Link>
       ))}
     </div>
   );
@@ -129,6 +179,7 @@ export default function Sidebar() {
           />
         </div>
         <SidebarOptions />
+        <SidebarChats />
       </div>
       <SidebarProfile />
     </div>

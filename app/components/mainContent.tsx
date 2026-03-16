@@ -11,6 +11,7 @@ import { MoveRight } from "lucide-react";
 import { Message } from "../types/messages";
 import ReactMarkdown from "react-markdown";
 import gsap from "gsap";
+import { useRouter } from "next/navigation";
 
 const MessageRow = memo(({ message }: { message: Message }) => {
   return (
@@ -221,18 +222,28 @@ function ChatSection({ messages }: { messages: Message[] }) {
 }
 
 export default function MainContent() {
-  const { messages, sendMessage } = useChatStore();
+  const router = useRouter();
+  const { chats, currentChatId, sendMessage, createChat } = useChatStore();
+
+  const activeChat = currentChatId ? chats[currentChatId] : null;
+  const messages = activeChat?.messages || [];
+
   const [chatMessage, setChatMessage] = useState<string>("");
   const editableRef = useRef<HTMLParagraphElement>(null);
 
-  const handleSend = (e?: SubmitEvent) => {
+  const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    sendMessage(chatMessage);
-    setChatMessage("");
+    if (!chatMessage.trim()) return;
 
-    if (editableRef.current) {
-      editableRef.current.innerText = "";
+    setChatMessage("");
+    if (editableRef.current) editableRef.current.innerText = "";
+
+    let targetId = currentChatId;
+    if (!targetId) {
+      targetId = createChat();
+      router.push(`/chat/${targetId}`);
     }
+    await sendMessage(chatMessage);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -244,7 +255,19 @@ export default function MainContent() {
 
   return (
     <div className="flex-1 flex flex-col h-screen relative overflow-hidden">
-      <ChatSection messages={messages} />
+      {!currentChatId ? (
+        <div className="flex-1 flex items-center justify-center">
+          <button
+            onClick={() => createChat()}
+            className="p-4 bg-primary text-white rounded-lg"
+          >
+            Start a new conversation
+          </button>
+        </div>
+      ) : (
+        <ChatSection messages={messages} />
+      )}
+
       <form
         onSubmit={handleSend}
         className="w-full bg-background relative pb-2 mx-auto px-6"

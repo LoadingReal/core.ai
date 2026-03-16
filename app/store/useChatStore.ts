@@ -1,22 +1,65 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { ChatStoreState, Message } from "../types/messages";
+import { Chat, ChatStoreState, Message } from "../types/messages";
 
 export const useChatStore = create<ChatStoreState>()(
   persist(
     (set, get) => ({
-      messages: [],
+      chats: {},
+      currentChatId: null,
       isLoading: false,
+
+      createChat: () => {
+        const id = crypto.randomUUID();
+        const newChat: Chat = {
+          id,
+          title: "New Chat",
+          messages: [],
+          createdAt: Date.now(),
+        };
+        set((state) => ({
+          chats: { ...state.chats, [id]: newChat },
+          currentChatId: id,
+        }));
+        return id;
+      },
+
+      switchChat: (id) => set({ currentChatId: id }),
+
+      deleteChat: (id: string) =>
+        set((state) => {
+          const newChats = { ...state.chats };
+          delete newChats[id];
+          return {
+            chats: newChats,
+            currentChatId:
+              state.currentChatId === id ? null : state.currentChatId,
+          };
+        }),
+
       sendMessage: async (content: string) => {
+        const { currentChatId, chats } = get();
+        // If no chat exists, create one first
+        let activeId = currentChatId;
+        if (!activeId) {
+          activeId = get().createChat();
+        }
+
         const userMessage: Message = { role: "user", content };
 
         set((state) => ({
-          messages: [
-            ...state.messages,
-            userMessage,
-            { role: "assistant", content: "" },
-          ],
           isLoading: true,
+          chats: {
+            ...state.chats,
+            [activeId!]: {
+              ...state.chats[activeId!],
+              messages: [
+                ...state.chats[activeId!].messages,
+                userMessage,
+                { role: "assistant", content: "" },
+              ],
+            },
+          },
         }));
 
         try {
@@ -24,35 +67,38 @@ export const useChatStore = create<ChatStoreState>()(
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              messages: get().messages.slice(0, -1),
+              // Send history for the active chat
+              messages: get().chats[activeId!].messages.slice(0, -1),
             }),
           });
 
           if (!response.ok) throw new Error("Failed to fetch AI");
-          if (!response.body) throw new Error("No response body");
-
-          const reader = response.body.getReader();
+          const reader = response.body?.getReader();
           const decoder = new TextDecoder();
           let accumulatedContent = "";
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              accumulatedContent += decoder.decode(value, { stream: true });
 
-            const chunk = decoder.decode(value, { stream: true });
-            accumulatedContent += chunk;
-
-            set((state) => {
-              const newMessages = [...state.messages];
-              const lastIndex = newMessages.length - 1;
-              newMessages[lastIndex] = {
-                ...newMessages[lastIndex],
-                content: accumulatedContent,
-              };
-              return { messages: newMessages };
-            });
+              set((state) => {
+                const chat = state.chats[activeId!];
+                const newMessages = [...chat.messages];
+                newMessages[newMessages.length - 1] = {
+                  ...newMessages[newMessages.length - 1],
+                  content: accumulatedContent,
+                };
+                return {
+                  chats: {
+                    ...state.chats,
+                    [activeId!]: { ...chat, messages: newMessages },
+                  },
+                };
+              });
+            }
           }
-
           set({ isLoading: false });
         } catch (err) {
           console.error("Chat Error: ", err);
@@ -60,8 +106,6 @@ export const useChatStore = create<ChatStoreState>()(
         }
       },
     }),
-    {
-      name: "chat-history-storage",
-    },
+    { name: "chat-history-storage" },
   ),
 );
