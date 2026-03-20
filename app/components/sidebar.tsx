@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import {
   ChevronLeft,
   Menu,
@@ -19,6 +17,8 @@ import { useChatStore } from "../store/useChatStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
+
+export const dynamic = "force-dynamic";
 
 function SidebarOptions() {
   const { isOpen, toggle } = useSidebarState();
