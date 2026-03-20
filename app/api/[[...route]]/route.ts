@@ -68,8 +68,15 @@ app.post("/chat", async (c) => {
         }
       }
     });
-  } catch (err) {
-    return c.json({ error: "Backend failure" }, 500);
+  } catch (err: any) {
+    return c.json(
+      {
+        error: "Backend failure",
+        message: err.message,
+        stack: err.stack,
+      },
+      500,
+    );
   }
 });
 
