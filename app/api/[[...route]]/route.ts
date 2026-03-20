@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
+import { handle } from "hono/cloudflare-pages";
 import { env } from "hono/adapter";
 import { stream, streamText } from "hono/streaming";
 
@@ -67,3 +67,4 @@ app.post("/chat", async (c) => {
 
 export const GET = handle(app);
 export const POST = handle(app);
+export const onRequest = handle(app);
