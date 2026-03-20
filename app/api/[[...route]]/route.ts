@@ -18,6 +18,7 @@ app.post("/chat", async (c) => {
       return c.json({ error: "VPS_URL Environment Variable is missing" }, 500);
     }
 
+    console.log(`Fetching from: ${vpsUrl}/api/chat`);
     const { messages } = await c.req.json();
     const recentMessages = messages.slice(-10);
     const controller = new AbortController();
@@ -53,8 +54,8 @@ app.post("/chat", async (c) => {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-
         const lines = chunk.split("\n");
+
         for (const line of lines) {
           if (!line.trim()) continue;
           try {
@@ -62,8 +63,10 @@ app.post("/chat", async (c) => {
             if (json.message?.content) {
               await stream.write(json.message.content);
             }
+            if (json.done) return;
           } catch (e) {
-            // Skip partial JSON lines
+            // This catches partial JSON lines—don't stop the stream!
+            continue;
           }
         }
       }
