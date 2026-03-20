@@ -1,12 +1,14 @@
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
   "name": "core-ai",
-  "main": ".vercel/output/static/_worker.js/index.js",
-  "compatibility_date": "2024-04-03",
+  // Set this to today's date
+  "compatibility_date": "2026-03-20",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "assets": {
-    "directory": ".vercel/output/static",
+    "directory": ".open-next/assets",
     "binding": "ASSETS"
   }
 }
