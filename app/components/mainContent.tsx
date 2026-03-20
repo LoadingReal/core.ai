@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 const MessageRow = memo(({ message }: { message: Message }) => {
   return (
     <div className="flex">
-      <div className="min-w-16 pt-4">
+      <div className="mr-2 md:mr-0 md:min-w-16 pt-4">
         {message.role === "assistant" && (
           <div
             className="assistant-icon translate-z-0 w-4 rounded-full h-4 bg-neutral-500 dark:bg-primary mx-auto 
@@ -208,7 +208,7 @@ function ChatSection({ messages }: { messages: Message[] }) {
       ref={containerRef}
       className="flex-1 overflow-y-auto custom-scrollbar px-6"
     >
-      <div className="max-w-200 mx-auto px-4 pb-12">
+      <div className="max-w-200 mx-auto md:px-4 pb-12">
         <div className="flex flex-col space-y-4">
           {messages.map((message, index) => (
             <MessageRow key={index} message={message} />
@@ -235,20 +235,17 @@ export default function MainContent() {
     e?.preventDefault();
     if (!chatMessage.trim()) return;
 
-    const messageToSend = chatMessage; // Capture the message
+    const messageToSend = chatMessage;
     setChatMessage("");
     if (editableRef.current) editableRef.current.innerText = "";
 
     let targetId = currentChatId;
 
     if (!targetId) {
-      // 1. Create the chat and get the ID
       targetId = createChat();
-      // 2. Navigate immediately
       router.push(`/chat/${targetId}`);
     }
 
-    // 3. Pass targetId to sendMessage so it doesn't rely on the potentially stale 'currentChatId'
     await sendMessage(messageToSend, targetId);
   };
 
