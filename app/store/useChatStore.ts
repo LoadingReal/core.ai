@@ -79,7 +79,25 @@ export const useChatStore = create<ChatStoreState>()(
           if (reader) {
             while (true) {
               const { done, value } = await reader.read();
-              if (done) break;
+              if (done) {
+                const finalChunk = decoder.decode();
+                if (finalChunk) {
+                  accumulatedContent += finalChunk;
+                  set((state) => {
+                    const chat = state.chats[activeId!];
+                    const newMessages = [...chat.messages];
+                    newMessages[newMessages.length - 1].content =
+                      accumulatedContent;
+                    return {
+                      chats: {
+                        ...state.chats,
+                        [activeId!]: { ...chat, messages: newMessages },
+                      },
+                    };
+                  });
+                }
+                break;
+              }
               accumulatedContent += decoder.decode(value, { stream: true });
 
               set((state) => {

@@ -39,8 +39,12 @@ app.post("/chat", async (c) => {
     if (!response.ok) return c.json({ error: "VPS Offline" }, 500);
 
     return streamText(c, async (stream) => {
+      c.header("Content-Type", "text/event-stream");
+      c.header("Cache-Control", "no-cache");
+      c.header("Connection", "keep-alive");
+      c.header("X-Content-Type-Options", "nosniff");
+
       stream.onAbort(() => {
-        console.log("User disconnected. Stopping AI...");
         controller.abort();
       });
 
@@ -63,10 +67,10 @@ app.post("/chat", async (c) => {
             if (json.message?.content) {
               await stream.write(json.message.content);
             }
+            // ✅ Only return if the VPS explicitly says it's done
             if (json.done) return;
           } catch (e) {
-            // This catches partial JSON lines—don't stop the stream!
-            continue;
+            // Partial JSON? Keep going.
           }
         }
       }
