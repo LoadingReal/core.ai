@@ -1,5 +1,6 @@
 {
   "name": "core-ai",
+  "main": ".vercel/output/static/_worker.js/index.js",
   "compatibility_date": "2024-04-03",
   "compatibility_flags": [
     "nodejs_compat"
@@ -7,8 +8,5 @@
   "assets": {
     "directory": ".vercel/output/static",
     "binding": "ASSETS"
-  },
-  "observability": {
-    "enabled": true
   }
 }
