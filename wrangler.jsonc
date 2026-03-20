@@ -1,9 +1,6 @@
 {
   "name": "core-ai",
-  "pages_build_output_dir": ".next",
   "compatibility_date": "2024-04-03",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-  "preset": "next"
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": ".vercel/output/static" 
 }
