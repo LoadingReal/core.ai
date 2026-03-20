@@ -67,10 +67,9 @@ app.post("/chat", async (c) => {
             if (json.message?.content) {
               await stream.write(json.message.content);
             }
-            // ✅ Only return if the VPS explicitly says it's done
-            if (json.done) return;
+            if (json.done) break;
           } catch (e) {
-            // Partial JSON? Keep going.
+            continue;
           }
         }
       }
