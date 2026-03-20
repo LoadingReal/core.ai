@@ -1,20 +1,28 @@
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
-import { env } from "hono/adapter";
 import { stream, streamText } from "hono/streaming";
 
 export const runtime = "edge";
 
-const app = new Hono().basePath("/api");
+type Bindings = {
+  VPS_URL: string;
+};
+
+const app = new Hono<{ Bindings: Bindings }>().basePath("/api");
 
 app.post("/chat", async (c) => {
   try {
-    const { VPS_URL } = env<{ VPS_URL: string }>(c);
+    const vpsUrl = c.env?.VPS_URL || process.env.VPS_URL;
+
+    if (!vpsUrl) {
+      return c.json({ error: "VPS_URL Environment Variable is missing" }, 500);
+    }
+
     const { messages } = await c.req.json();
     const recentMessages = messages.slice(-10);
     const controller = new AbortController();
 
-    const response = await fetch(`${VPS_URL}/api/chat`, {
+    const response = await fetch(`${vpsUrl}/api/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
