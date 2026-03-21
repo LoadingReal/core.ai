@@ -307,6 +307,7 @@ export default function Sidebar() {
             : "opacity-0 pointer-events-none"
         }`}
         onClick={toggle}
+        style={{ backdropFilter: "blur(2px)" }}
       />
 
       <div

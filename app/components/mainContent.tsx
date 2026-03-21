@@ -271,7 +271,7 @@ export default function MainContent() {
 
       <form
         onSubmit={handleSend}
-        className="w-full bg-background relative pb-2 mx-auto px-6"
+        className="w-full bg-background relative pb-2 mx-auto px-6 z-10"
       >
         <div className="bg-linear-to-t from-background via-background/50 to-transparent h-16 w-full absolute -top-16 left-0 pointer-events-none"></div>
         <div className="relative mx-auto max-w-200 w-full">
