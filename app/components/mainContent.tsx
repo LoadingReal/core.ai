@@ -234,7 +234,10 @@ export default function MainContent() {
 
     const messageToSend = chatMessage;
     setChatMessage("");
-    if (editableRef.current) editableRef.current.innerText = "";
+    if (editableRef.current) {
+      editableRef.current.blur();
+      editableRef.current.innerText = "";
+    }
 
     let targetId = currentChatId;
 
