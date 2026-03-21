@@ -19,7 +19,7 @@ export default function ChatPage() {
   }, [id, switchChat]);
 
   return (
-    <main className="flex w-screen h-screen bg-background overflow-hidden">
+    <main className="flex w-screen h-dvh bg-background overflow-hidden">
       <Sidebar />
       <MainContent />
     </main>
