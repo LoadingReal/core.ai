@@ -14,14 +14,13 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Clear active chat when hitting the landing page
     switchChat(null);
   }, [switchChat]);
 
   if (!mounted) return null;
 
   return (
-    <main className="flex w-screen h-screen bg-background overflow-hidden">
+    <main className="flex w-screen h-dvh bg-background overflow-hidden">
       <Sidebar />
       <MainContent />
     </main>
