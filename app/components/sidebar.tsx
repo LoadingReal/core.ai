@@ -162,14 +162,19 @@ function SidebarChats() {
             </Link>
 
             {isOpen && (
-              <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity flex items-center">
+              <div
+                className={`
+                absolute right-2 top-1/2 -translate-y-1/2 flex items-center transition-opacity
+                opacity-100 md:opacity-0 md:group-hover/chat:opacity-100
+              `}
+              >
                 <button
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setChatToDelete(chat.id);
                   }}
-                  className="p-1 hover:bg-red-500/20 hover:text-red-500 rounded-md transition-colors"
+                  className="p-1.5 hover:bg-red-500/20 text-muted-foreground hover:text-red-500 rounded-md transition-colors"
                 >
                   <Trash2 className="size-4" />
                 </button>

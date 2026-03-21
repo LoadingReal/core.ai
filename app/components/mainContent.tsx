@@ -19,7 +19,7 @@ const MessageRow = memo(({ message }: { message: Message }) => {
       <div className="mr-2 md:mr-0 md:min-w-16 pt-4">
         {message.role === "assistant" && (
           <div
-            className="assistant-icon shrink-0 translate-z-0 w-4 rounded-full h-4 bg-neutral-500 dark:bg-primary mx-auto 
+            className="assistant-icon shrink-0 aspect-square translate-z-0 w-4 rounded-full h-4 bg-neutral-500 dark:bg-primary mx-auto relative overflow-hidden
                       after:content-[''] after:absolute after:inset-0 after:bg-inherit after:rounded-inherit after:-z-10
                       after:transform-[scale(var(--halo-scale,1))] after:opacity-(--halo-opacity,0) after:rounded-full"
           ></div>
@@ -158,43 +158,40 @@ function ChatSection({ messages }: { messages: Message[] }) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      if (isLoading) {
-        const icons = document.querySelectorAll(".assistant-icon");
-        const lastIcon = icons[icons.length - 1];
+      const icons = document.querySelectorAll(".assistant-icon");
+      const lastIcon = icons[icons.length - 1];
 
-        if (lastIcon) {
-          gsap.to(lastIcon, {
-            scale: 1.3,
+      if (isLoading && lastIcon) {
+        gsap.to(lastIcon, {
+          scale: 1.3,
+          borderRadius: "50%",
+          duration: 0.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+
+        gsap.fromTo(
+          lastIcon,
+          {
+            "--halo-scale": 1,
+            "--halo-opacity": 0.6,
+          },
+          {
+            "--halo-scale": 2,
+            "--halo-opacity": 0,
             borderRadius: "100%",
-            duration: 0.5,
+            duration: 1,
             repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            overwrite: "auto",
-          });
-
-          gsap.fromTo(
-            lastIcon,
-            {
-              "--halo-scale": 1,
-              "--halo-opacity": 0.6,
-            },
-            {
-              "--halo-scale": 2,
-              "--halo-opacity": 0,
-              borderRadius: "100%",
-              duration: 1,
-              repeat: -1,
-              ease: "power1.out",
-            },
-          );
-        }
+            ease: "power1.out",
+          },
+        );
       } else {
         gsap.to(".assistant-icon", {
           scale: 1,
           "--halo-scale": 1,
           "--halo-opacity": 0,
-          borderRadius: "100%",
+          clearProps: "scale,borderRadius,transform",
           duration: 0.3,
         });
       }
