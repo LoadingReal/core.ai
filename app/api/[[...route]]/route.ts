@@ -38,12 +38,12 @@ app.post("/chat", async (c) => {
 
     if (!response.ok) return c.json({ error: "VPS Offline" }, 500);
 
-    return streamText(c, async (stream) => {
-      c.header("Content-Type", "text/event-stream");
-      c.header("Cache-Control", "no-cache");
-      c.header("Connection", "keep-alive");
-      c.header("X-Content-Type-Options", "nosniff");
+    c.header("Content-Type", "text/event-stream");
+    c.header("Cache-Control", "no-cache");
+    c.header("Connection", "keep-alive");
+    c.header("X-Content-Type-Options", "nosniff");
 
+    return streamText(c, async (stream) => {
       stream.onAbort(() => {
         controller.abort();
       });
@@ -53,12 +53,16 @@ app.post("/chat", async (c) => {
 
       const decoder = new TextDecoder();
 
+      let buffer = "";
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
           if (!line.trim()) continue;
@@ -67,9 +71,9 @@ app.post("/chat", async (c) => {
             if (json.message?.content) {
               await stream.write(json.message.content);
             }
-            if (json.done) break;
+            if (json.done) return;
           } catch (e) {
-            continue;
+            console.error("Split JSON detected, skipping or waiting...");
           }
         }
       }
