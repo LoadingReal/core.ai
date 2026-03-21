@@ -10,7 +10,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "pages:build": "npx @cloudflare/next-on-pages && cp public/_redirects .vercel/output/static/_redirects"
+    "pages:build": "npx @cloudflare/next-on-pages && cp -f public/_redirects .vercel/output/static/_redirects || true"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
