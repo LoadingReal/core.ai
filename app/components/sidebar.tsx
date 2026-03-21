@@ -255,13 +255,16 @@ function SidebarProfile() {
 
 export default function Sidebar() {
   const [isHydrated, setIsHydrated] = useState(false);
-  const { isOpen, toggle } = useSidebarState();
+  const { isOpen, toggle, setOpen } = useSidebarState();
   const containerRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef<boolean>(true);
 
   useEffect(() => {
     setIsHydrated(true);
-  }, []);
+    if (window.innerWidth < 768) {
+      setOpen(false);
+    }
+  }, [setOpen]);
 
   useGSAP(
     () => {
@@ -306,7 +309,7 @@ export default function Sidebar() {
         className={`
           fixed inset-y-0 left-0 z-40 
           md:relative md:translate-x-0
-          bg-sidebar h-screen flex flex-col shrink-0 overflow-hidden
+          bg-sidebar h-dvh flex flex-col shrink-0 overflow-hidden
           transition-transform duration-300 ease-in-out md:transition-none
           ${isOpen ? "w-64" : "w-64 md:w-16"}
           ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}

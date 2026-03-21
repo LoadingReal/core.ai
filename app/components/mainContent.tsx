@@ -257,7 +257,7 @@ export default function MainContent() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen relative overflow-hidden">
+    <div className="flex-1 flex flex-col h-dvh relative overflow-hidden">
       {messages.length > 0 ? (
         <ChatSection messages={messages} />
       ) : (
